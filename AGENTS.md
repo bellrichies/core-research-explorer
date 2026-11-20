@@ -1,6 +1,6 @@
 # Codex Agent Instructions — CORE Research Explorer
 
-> Applies to this repository. The engineering specification is in `docs\CORE_RESEARCH_EXPLORER_PLAN.md`. For copy/paste task prompts, see `docs\CODEX_PROMPTS.md`.
+> Applies to this repository. The engineering specification is in `docs\CORE_RESEARCH_EXPLORER_PLAN.md`.
 
 ## Working agreement for Codex
 

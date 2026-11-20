@@ -12,8 +12,8 @@ export const appConfig: ApplicationConfig = {
     {
       provide: CORE_API_CONFIG,
       useValue: {
-        mode: 'fixture',
-        coreBaseUrl: 'https://api.core.ac.uk/v3/search/works',
+        mode: 'core',
+        coreBaseUrl: '/api/core/works',
         fixtureUrl: '/core-search-fixture.json',
       },
     },

@@ -71,4 +71,13 @@ describe('ResearchStore', () => {
     expect(oldRequest.cancelled).toBe(true);
     expect(store.isEmpty()).toBe(true);
   });
+
+  it('explains when the server-side CORE key is not configured', () => {
+    store.search('drone', 10);
+    http
+      .expectOne('/core-search-fixture.json')
+      .flush({ code: 'CORE_API_KEY_MISSING' }, { status: 503, statusText: 'Service Unavailable' });
+
+    expect(store.errorMessage()).toContain('CORE_API_KEY');
+  });
 });

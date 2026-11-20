@@ -8,8 +8,7 @@
   <section class="search-panel" aria-labelledby="search-heading">
     <h2 id="search-heading">Search CORE</h2>
     <p class="fixture-note">
-      Development mode uses the sanitized fixture. Live CORE access is blocked until credentials and
-      CORS behavior are verified.
+      Live search is provided by CORE through the application's secure server connection.
     </p>
     <form [formGroup]="searchForm" (ngSubmit)="submitSearch()" novalidate>
       <label for="query">Boolean query</label>

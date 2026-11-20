@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test('sends a Boolean query and count, then renders chart and keyboard-operable controls', async ({
   page,
 }) => {
-  await page.route('**/core-search-fixture.json', async (route) => {
+  await page.route('**/api/core/works**', async (route) => {
     await route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({
@@ -53,7 +53,7 @@ test('sends a Boolean query and count, then renders chart and keyboard-operable 
 test('shows loading, missing metadata, empty, and error states with fixture routes', async ({
   page,
 }) => {
-  await page.route('**/core-search-fixture.json', async (route) => {
+  await page.route('**/api/core/works**', async (route) => {
     await new Promise((resolve) => setTimeout(resolve, 150));
     await route.fulfill({
       contentType: 'application/json',
@@ -66,8 +66,8 @@ test('shows loading, missing metadata, empty, and error states with fixture rout
   await expect(page.getByText('Searching CORE...')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'No papers found' })).toBeVisible();
 
-  await page.unroute('**/core-search-fixture.json');
-  await page.route('**/core-search-fixture.json', (route) =>
+  await page.unroute('**/api/core/works**');
+  await page.route('**/api/core/works**', (route) =>
     route.fulfill({ status: 429, contentType: 'application/json', body: '{}' }),
   );
   await page.getByRole('button', { name: 'Search' }).click();

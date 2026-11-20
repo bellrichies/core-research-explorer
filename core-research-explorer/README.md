@@ -1,59 +1,71 @@
-# CoreResearchExplorer
+# CORE Research Explorer
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.3.0.
+Angular research discovery application backed by CORE API v3. Live requests pass through a small
+server-side proxy so the CORE API key is never included in browser code.
 
-## Development server
+## Prerequisites
 
-To start a local development server, run:
+- Node.js supported by the installed Angular CLI
+- npm
+- A CORE API key obtained from CORE
 
-```bash
-ng serve
+## Configure live CORE search
+
+Copy `.env.example` to `.env` and replace the placeholder value:
+
+```dotenv
+CORE_API_KEY=your_real_core_api_key
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+`.env` is ignored by Git. Do not put the key in Angular environment files, frontend source, or a
+committed configuration file.
 
-## Code scaffolding
+## Run locally
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Install dependencies, then start the Angular client and CORE proxy together:
 
 ```bash
-ng generate --help
+npm install
+npm start
 ```
 
-## Building
+Open <http://127.0.0.1:4200/>. The client sends requests to `/api/core/works`; the Angular development
+proxy forwards those requests to the local server on port 3000. The server adds the CORE bearer token
+and calls `https://api.core.ac.uk/v3/search/works`.
 
-To build the project run:
+To run the processes separately:
 
 ```bash
-ng build
+npm run start:server
+npm run start:client
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+The server health endpoint is available at <http://127.0.0.1:3000/health>. It reports whether a key is
+configured without revealing the key.
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Checks
 
 ```bash
-ng test
+npm run lint
+npm run test:all
+npm run test:e2e
+npm run build
 ```
 
-## Running end-to-end tests
+Unit tests use fixtures and mocked upstream requests. They do not consume the live CORE quota.
 
-For end-to-end (e2e) testing, run:
+## Production deployment
 
-```bash
-ng e2e
-```
+Deploy the Angular build and the server proxy behind the same public origin, route `/api/core/*` to the
+proxy, and configure `CORE_API_KEY` in the hosting platform's secret manager. Enforce HTTPS. The local
+development proxy is not a production reverse proxy.
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Current limitations
 
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- A successful authenticated CORE response still depends on a valid account, key, quota, and current
+  upstream availability.
+- The application requests at most 50 records and currently supports only the first result page.
+- Live Boolean grammar and the maximum supported CORE page size must still be confirmed with a
+  successful authenticated request.
+- The fixture in `public/core-search-fixture.json` is test data and is not presented by the running
+  application as a live search result.

@@ -60,6 +60,15 @@ export class ResearchStore implements OnDestroy {
     if (error.status === 429) {
       return 'CORE is rate-limiting requests. Wait briefly, then retry.';
     }
+    if (
+      error.status === 503 &&
+      typeof error.error === 'object' &&
+      error.error !== null &&
+      'code' in error.error &&
+      error.error.code === 'CORE_API_KEY_MISSING'
+    ) {
+      return 'Live CORE search is not configured. Add CORE_API_KEY to the server environment.';
+    }
     if (error.status >= 500) {
       return 'CORE is temporarily unavailable. Please retry.';
     }

@@ -15,7 +15,7 @@ describe('CoreApiService live configuration', () => {
           provide: CORE_API_CONFIG,
           useValue: {
             mode: 'core',
-            coreBaseUrl: 'https://api.core.ac.uk/v3/search/works',
+            coreBaseUrl: '/api/core/works',
             fixtureUrl: '/core-search-fixture.json',
           },
         },
@@ -30,9 +30,7 @@ describe('CoreApiService live configuration', () => {
     const http = TestBed.inject(HttpTestingController);
     service.search('drone AND (package OR delivery)', 20).subscribe();
 
-    const request = http.expectOne(
-      (candidate) => candidate.url === 'https://api.core.ac.uk/v3/search/works',
-    );
+    const request = http.expectOne((candidate) => candidate.url === '/api/core/works');
     expect(request.request.method).toBe('GET');
     expect(request.request.params.get('q')).toBe('drone AND (package OR delivery)');
     expect(request.request.params.get('offset')).toBe('0');

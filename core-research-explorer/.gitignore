@@ -6,10 +6,12 @@
 /out-tsc
 /bazel-out
 
+
 # Node
 /node_modules
 npm-debug.log
 yarn-error.log
+debug.log*
 
 # IDEs and editors
 .idea/
@@ -31,9 +33,14 @@ yarn-error.log
 
 # Miscellaneous
 /.angular/cache
+.env
+.env.*
+
+!.env.example
 .sass-cache/
 /connect.lock
 /coverage
+/test-results/
 /libpeerconnection.log
 testem.log
 /typings

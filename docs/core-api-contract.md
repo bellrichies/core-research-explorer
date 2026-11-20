@@ -68,19 +68,22 @@ this document.
 
 ## Backend-for-frontend decision
 
-A backend-for-frontend is **necessary for secure key-based deployment**. It can keep a private API key in
-server environment variables, apply server-side limits/timeouts, and normalize CORE errors for the Angular
-client. It is not necessary merely to run a static fixture-only UI or to document the contract.
+A backend-for-frontend is **implemented for secure key-based deployment**. The Angular client calls the
+same-origin `/api/core/works` route. The Node server reads `CORE_API_KEY` from its environment, validates the
+query and result limit, applies a timeout, adds the bearer token, and forwards the request to CORE. The key is
+never added to the Angular build.
 
-The final direct-browser versus BFF decision also depends on observed CORS and key behavior. No direct-browser
-key will be added as part of this foundation.
+The BFF implementation and mocked upstream behavior are automated-test verified. A successful authenticated
+CORE response is **not** yet claimed because no valid key was available during verification.
 
 ## Remaining blockers
 
 - Successful authenticated request
-- Confirmed CORS behavior
 - Confirmed `limit` maximum
 - Confirmed pagination and sorting semantics
 - Confirmed live Boolean grammar
 - Confirmed live result shape and missing-field behavior
 - Confirmed rate-limit reset and `Retry-After` behavior
+
+Direct-browser CORS behavior is still unverified, but it no longer blocks the selected architecture because
+the browser communicates with the same-origin BFF rather than CORE directly.
