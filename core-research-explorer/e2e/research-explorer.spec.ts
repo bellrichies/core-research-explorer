@@ -1,0 +1,76 @@
+import { expect, test } from '@playwright/test';
+
+test('sends a Boolean query and count, then renders chart and keyboard-operable controls', async ({
+  page,
+}) => {
+  await page.route('**/core-search-fixture.json', async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        total_hits: 20,
+        results: [
+          {
+            id: 1,
+            title: 'Fixture drone delivery',
+            authors: [],
+            abstract: null,
+            year_published: 2024,
+          },
+          {
+            id: 2,
+            title: 'Second fixture paper',
+            authors: ['Example Author'],
+            abstract: 'Fixture abstract',
+            year_published: 2022,
+          },
+          {
+            id: 3,
+            title: 'Missing year fixture',
+            authors: null,
+            abstract: null,
+            year_published: null,
+          },
+        ],
+      }),
+    });
+  });
+
+  await page.goto('/');
+  await page.getByLabel('Boolean query').fill('drone AND (package OR delivery)');
+  await page.getByLabel('Number of papers').selectOption('20');
+  await page.getByRole('button', { name: 'Search' }).press('Enter');
+
+  await expect(page.getByText(/Retrieved 3 paper\(s\)/)).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Publication year distribution' })).toBeVisible();
+  await expect(page.locator('.year-bar-group')).toHaveCount(2);
+  await expect(page.getByText(/1 paper\(s\) excluded/)).toBeVisible();
+
+  await page.getByLabel('Boolean query').focus();
+  await page.keyboard.press('Tab');
+  await expect(page.getByLabel('Number of papers')).toBeFocused();
+});
+
+test('shows loading, missing metadata, empty, and error states with fixture routes', async ({
+  page,
+}) => {
+  await page.route('**/core-search-fixture.json', async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ total_hits: 0, results: [] }),
+    });
+  });
+
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Search' }).click();
+  await expect(page.getByText('Searching CORE...')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'No papers found' })).toBeVisible();
+
+  await page.unroute('**/core-search-fixture.json');
+  await page.route('**/core-search-fixture.json', (route) =>
+    route.fulfill({ status: 429, contentType: 'application/json', body: '{}' }),
+  );
+  await page.getByRole('button', { name: 'Search' }).click();
+  await expect(page.getByRole('heading', { name: 'Search unavailable' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Retry' })).toBeVisible();
+});

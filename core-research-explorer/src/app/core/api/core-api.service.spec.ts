@@ -81,4 +81,37 @@ describe('CoreApiService', () => {
     });
     expect(capturedCount).toBe(0);
   });
+
+  it('maps missing and malformed paper fields without crashing', () => {
+    let result: ResearchSearchResult | undefined;
+    service.search('missing fields', 20).subscribe((value) => (result = value));
+
+    http.expectOne('/core-search-fixture.json').flush({
+      total_hits: 'unknown',
+      results: [
+        {
+          id: null,
+          title: null,
+          authors: ['Valid Author', 42, null],
+          abstract: null,
+          year_published: 'not-a-year',
+          doi: null,
+          links: [],
+        },
+      ],
+    });
+
+    expect(result!.totalHits).toBeNull();
+    expect(result!.papers[0]).toEqual({
+      id: 'paper-1',
+      title: 'Untitled research paper',
+      authors: ['Valid Author'],
+      abstract: null,
+      publishedYear: null,
+      doi: null,
+      sourceUrl: null,
+      downloadUrl: null,
+      publisher: null,
+    });
+  });
 });

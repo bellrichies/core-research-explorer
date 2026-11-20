@@ -16,4 +16,16 @@ describe('validateBooleanQuery', () => {
   it('rejects trailing operators', () => {
     expect(validateBooleanQuery('drone AND').valid).toBe(false);
   });
+
+  it('rejects operators placed beside closing or opening parentheses', () => {
+    expect(validateBooleanQuery('(drone AND) OR delivery').valid).toBe(false);
+  });
+
+  it('rejects unmatched closing parentheses', () => {
+    expect(validateBooleanQuery('drone AND delivery)').valid).toBe(false);
+  });
+
+  it('allows NOT and nested parentheses', () => {
+    expect(validateBooleanQuery('NOT drone AND (delivery OR package)').valid).toBe(true);
+  });
 });

@@ -68,4 +68,62 @@ describe('App', () => {
     expect(compiled.querySelectorAll('.year-bar-group').length).toBe(2);
     expect(compiled.querySelector('.chart-summary')?.textContent).toContain('1 paper(s)');
   });
+
+  it('shows loading then a fixture empty state', async () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const store = fixture.debugElement.injector.get(ResearchStore);
+    const http = TestBed.inject(HttpTestingController);
+
+    store.search('unknown topic', 20);
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).querySelector('.status')?.textContent).toContain(
+      'Searching CORE',
+    );
+
+    http.expectOne('/core-search-fixture.json').flush({ total_hits: 0, results: [] });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('.state h3')?.textContent,
+    ).toContain('No papers found');
+  });
+
+  it('shows a clear error and retry control', async () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const store = fixture.debugElement.injector.get(ResearchStore);
+    const http = TestBed.inject(HttpTestingController);
+
+    store.search('drone', 10);
+    http
+      .expectOne('/core-search-fixture.json')
+      .flush({ message: 'rate limited' }, { status: 429, statusText: 'Too Many Requests' });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.error-state')?.textContent).toContain('rate-limiting requests');
+    expect(compiled.querySelector('.error-state button')?.textContent).toContain('Retry');
+  });
+
+  it('submits through the form with Enter', async () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    const query = compiled.querySelector('#query') as HTMLInputElement;
+    query.value = 'robots AND delivery';
+    query.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    const form = compiled.querySelector('form') as HTMLFormElement;
+    form.dispatchEvent(new SubmitEvent('submit', { bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+
+    const http = TestBed.inject(HttpTestingController);
+    http.expectOne('/core-search-fixture.json').flush({
+      total_hits: 1,
+      results: [{ id: 1, title: 'Keyboard result', year_published: 2024 }],
+    });
+  });
 });
