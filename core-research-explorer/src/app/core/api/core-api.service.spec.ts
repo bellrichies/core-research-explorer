@@ -18,9 +18,7 @@ describe('CoreApiService', () => {
         {
           provide: CORE_API_CONFIG,
           useValue: {
-            mode: 'fixture',
-            coreBaseUrl: 'https://api.core.ac.uk/v3/search/works',
-            fixtureUrl: '/core-search-fixture.json',
+            coreBaseUrl: '/api/core/works',
           },
         },
       ],
@@ -31,42 +29,45 @@ describe('CoreApiService', () => {
 
   afterEach(() => http.verify());
 
-  it('loads and maps the sanitized fixture', () => {
+  it('maps a CORE API response', () => {
     let result: ResearchSearchResult | undefined;
 
     service.search('drone AND (package OR delivery)', 10).subscribe((value) => {
       result = value;
     });
 
-    const request = http.expectOne('/core-search-fixture.json');
+    const request = http.expectOne((candidate) => candidate.url === '/api/core/works');
     expect(request.request.method).toBe('GET');
     request.flush({
-      total_hits: 1,
+      totalHits: 1,
       limit: 1,
       offset: 0,
       results: [
         {
           id: 123456,
-          title: 'Sanitized fixture title',
-          authors: ['Example Author'],
+          title: 'Autonomous delivery systems',
+          authors: [{ name: 'Research Author' }],
           abstract: null,
-          year_published: 2024,
+          yearPublished: 2024,
           doi: null,
-          download_url: null,
+          downloadUrl: 'https://core.ac.uk/download/123456.pdf',
           publisher: null,
-          links: [],
-          source_fulltext_urls: [],
+          links: [{ type: 'display', url: 'https://core.ac.uk/works/123456' }],
+          sourceFulltextUrls: ['https://repository.example/research.pdf'],
         },
       ],
     });
 
     expect(result!.papers[0]).toMatchObject({
       id: '123456',
-      title: 'Sanitized fixture title',
-      authors: ['Example Author'],
+      title: 'Autonomous delivery systems',
+      authors: ['Research Author'],
       abstract: null,
       publishedYear: 2024,
+      sourceUrl: 'https://core.ac.uk/works/123456',
+      downloadUrl: 'https://core.ac.uk/download/123456.pdf',
     });
+    expect(result!.totalHits).toBe(1);
     expect(result!.query).toBe('drone AND (package OR delivery)');
   });
 
@@ -75,10 +76,12 @@ describe('CoreApiService', () => {
     service.search('drone', 500).subscribe((result) => {
       capturedCount = result.retrievedCount;
     });
-    http.expectOne('/core-search-fixture.json').flush({
-      total_hits: 0,
-      results: [],
-    });
+    http
+      .expectOne((candidate) => candidate.url === '/api/core/works')
+      .flush({
+        totalHits: 0,
+        results: [],
+      });
     expect(capturedCount).toBe(0);
   });
 
@@ -86,25 +89,27 @@ describe('CoreApiService', () => {
     let result: ResearchSearchResult | undefined;
     service.search('missing fields', 20).subscribe((value) => (result = value));
 
-    http.expectOne('/core-search-fixture.json').flush({
-      total_hits: 'unknown',
-      results: [
-        {
-          id: null,
-          title: null,
-          authors: ['Valid Author', 42, null],
-          abstract: null,
-          year_published: 'not-a-year',
-          doi: null,
-          links: [],
-        },
-      ],
-    });
+    http
+      .expectOne((candidate) => candidate.url === '/api/core/works')
+      .flush({
+        totalHits: 'unknown',
+        results: [
+          {
+            id: null,
+            title: null,
+            authors: ['Valid Author', 42, null],
+            abstract: null,
+            yearPublished: 'not-a-year',
+            doi: null,
+            links: [],
+          },
+        ],
+      });
 
     expect(result!.totalHits).toBeNull();
     expect(result!.papers[0]).toEqual({
-      id: 'paper-1',
-      title: 'Untitled research paper',
+      id: null,
+      title: null,
       authors: ['Valid Author'],
       abstract: null,
       publishedYear: null,

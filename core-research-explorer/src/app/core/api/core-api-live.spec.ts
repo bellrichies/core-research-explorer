@@ -14,9 +14,7 @@ describe('CoreApiService live configuration', () => {
         {
           provide: CORE_API_CONFIG,
           useValue: {
-            mode: 'core',
             coreBaseUrl: '/api/core/works',
-            fixtureUrl: '/core-search-fixture.json',
           },
         },
       ],
@@ -35,6 +33,6 @@ describe('CoreApiService live configuration', () => {
     expect(request.request.params.get('q')).toBe('drone AND (package OR delivery)');
     expect(request.request.params.get('offset')).toBe('0');
     expect(request.request.params.get('limit')).toBe('20');
-    request.flush({ total_hits: 0, results: [] });
+    request.flush({ totalHits: 0, results: [] });
   });
 });

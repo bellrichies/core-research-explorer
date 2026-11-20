@@ -2,17 +2,16 @@
 
 ## Status
 
-- Verification date: 2026-11-20
+- Verification date: 2026-11-21
 - Official documentation: <https://api.core.ac.uk/docs/v3>
 - Swagger/OpenAPI document: <https://api.core.ac.uk/swagger/v3.json>
 - Live endpoint probe: `GET https://api.core.ac.uk/v3/search/works?q=drone%20AND%20(package%20OR%20delivery)&limit=1`
 
 ## Observed behavior
 
-The unauthenticated probe reached the CORE endpoint but returned **HTTP 429 Too Many Requests**.
-The response headers reported a limit of 10 requests and a retry time of 2026-11-20 16:59:46 UTC.
-This proves network reachability only. It does not prove successful authenticated search access or a usable
-response payload.
+An earlier unauthenticated probe reached CORE but returned **HTTP 429 Too Many Requests**. On 2026-11-21,
+an authenticated request through the local BFF succeeded for `drone AND (package OR delivery)` with
+`limit=1` and returned one work. No credential or response content is recorded here.
 
 ## Authentication
 
@@ -43,28 +42,25 @@ response. The implementation must not set an assumed limit until that behavior i
 ## Boolean syntax
 
 CORE documentation describes fielded queries such as `q=abstract:"bibliometrics"` and `q=authors:David`.
-The example `drone AND (package OR delivery)` is specified by the project plan, but its live acceptance,
-operator behavior, and field semantics have **not yet been verified** with a successful API request.
-Do not treat the fixture or UI-only validation as proof of CORE grammar.
+CORE accepted `drone AND (package OR delivery)` in the successful authenticated request. This confirms
+acceptance of that expression only; broader operator behavior and field semantics still require verification.
 
 ## Response wrapper
 
-The verified Swagger `SearchResponse` schema contains:
+The successful live response used these camelCase wrapper fields:
 
-- `total_hits`
+- `totalHits`
 - `limit`
 - `offset`
 - `results`
-- `tooks`
-- `search_id`
+- `searchId`
 
-The Swagger `results` schema is generic and no exact per-result shape is modeled in one typed union. The
-verified `Work` schema exposes relevant fields including `id`, `title`, `authors`, `abstract`,
-`year_published`, `published_date`, `doi`, `download_url`, `publisher`, `links`, and
-`source_fulltext_urls`.
+The observed work used camelCase fields including `id`, `title`, `authors`, `abstract`, `yearPublished`,
+`doi`, `downloadUrl`, `publisher`, `links`, and `sourceFulltextUrls`. Authors were objects containing a
+`name`; links were objects containing `type` and `url`. The mapper also accepts documented legacy
+snake_case variants defensively.
 
-Those names must remain behind a future mapper and can change or be null. No live response is claimed in
-this document.
+Those names remain behind the mapper and can change or be null.
 
 ## Backend-for-frontend decision
 
@@ -73,16 +69,15 @@ same-origin `/api/core/works` route. The Node server reads `CORE_API_KEY` from i
 query and result limit, applies a timeout, adds the bearer token, and forwards the request to CORE. The key is
 never added to the Angular build.
 
-The BFF implementation and mocked upstream behavior are automated-test verified. A successful authenticated
-CORE response is **not** yet claimed because no valid key was available during verification.
+The BFF implementation is verified with automated tests that intercept upstream requests and with the
+successful authenticated request described above.
 
 ## Remaining blockers
 
-- Successful authenticated request
 - Confirmed `limit` maximum
 - Confirmed pagination and sorting semantics
-- Confirmed live Boolean grammar
-- Confirmed live result shape and missing-field behavior
+- Confirmed behavior for Boolean expressions beyond the tested query
+- Confirmed missing-field behavior across representative live results
 - Confirmed rate-limit reset and `Retry-After` behavior
 
 Direct-browser CORS behavior is still unverified, but it no longer blocks the selected architecture because

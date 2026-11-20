@@ -23,7 +23,6 @@ describe('PublicationChart', () => {
       counts: [{ year: 2024, count: 2 }],
       includedCount: 2,
       missingCount: 1,
-      maximumCount: 2,
     });
 
     expect(element.querySelector('.scope-note')?.textContent).toContain('3 retrieved papers');
@@ -33,7 +32,7 @@ describe('PublicationChart', () => {
   });
 
   it('renders an informative empty state when every retrieved year is missing', () => {
-    const element = render({ counts: [], includedCount: 0, missingCount: 3, maximumCount: 0 }, 3);
+    const element = render({ counts: [], includedCount: 0, missingCount: 3 }, 3);
 
     expect(element.querySelector('.chart-empty')?.textContent).toContain(
       'None of the 3 retrieved paper(s)',
@@ -42,7 +41,7 @@ describe('PublicationChart', () => {
   });
 
   it('creates a synchronized chart host when valid years arrive after an empty result', () => {
-    const element = render({ counts: [], includedCount: 0, missingCount: 2, maximumCount: 0 }, 2);
+    const element = render({ counts: [], includedCount: 0, missingCount: 2 }, 2);
     expect(element.querySelector('.chart-empty')).toBeTruthy();
 
     fixture.componentRef.setInput('analytics', {
@@ -52,13 +51,11 @@ describe('PublicationChart', () => {
       ],
       includedCount: 3,
       missingCount: 0,
-      maximumCount: 2,
     });
     fixture.componentRef.setInput('retrievedCount', 3);
     fixture.detectChanges();
 
     expect(element.querySelector('.year-chart')).toBeTruthy();
-    expect(element.querySelector('.chart-fallback')).toBeTruthy();
     expect(element.querySelectorAll('table tbody tr')).toHaveLength(2);
     expect(element.querySelector('table')?.textContent).toContain('2024');
   });

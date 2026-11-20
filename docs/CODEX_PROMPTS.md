@@ -30,7 +30,7 @@ Read AGENTS.md and CORE_RESEARCH_EXPLORER_PLAN.md. Confirm Phase 2 is working. I
 ## Prompt 4 — Reliability and testing
 
 ```text
-Read AGENTS.md and CORE_RESEARCH_EXPLORER_PLAN.md. Implement Phase 4 only. Expand unit, HTTP integration, and Playwright E2E coverage for Boolean queries, result counts, request cancellation, missing fields, loading/errors, chart aggregation, and keyboard accessibility. Use fixtures where appropriate; do not claim mocked tests verify live API access. Run available checks and report outcomes and remaining risks. Stop for review.
+Read AGENTS.md and CORE_RESEARCH_EXPLORER_PLAN.md. Implement Phase 4 only. Expand unit, HTTP integration, and Playwright E2E coverage for Boolean queries, result counts, request cancellation, missing fields, loading/errors, chart aggregation, and keyboard accessibility. Use test-owned intercepted responses; do not add a fallback application data feed or claim automated tests verify live API access. Run available checks and report outcomes and remaining risks. Stop for review.
 ```
 
 ## Prompt 5 — Documentation and release

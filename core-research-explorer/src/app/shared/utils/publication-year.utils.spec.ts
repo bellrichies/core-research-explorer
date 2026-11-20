@@ -27,7 +27,6 @@ describe('aggregatePublicationYears', () => {
       { year: 2022, count: 1 },
       { year: 2024, count: 2 },
     ]);
-    expect(result.maximumCount).toBe(2);
     expect(result.missingCount).toBe(0);
   });
 
@@ -59,7 +58,6 @@ describe('aggregatePublicationYears', () => {
       counts: [],
       includedCount: 0,
       missingCount: 0,
-      maximumCount: 0,
     });
   });
 });

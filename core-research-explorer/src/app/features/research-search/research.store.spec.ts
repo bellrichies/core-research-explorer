@@ -17,9 +17,7 @@ describe('ResearchStore', () => {
         {
           provide: CORE_API_CONFIG,
           useValue: {
-            mode: 'fixture',
-            coreBaseUrl: 'https://api.core.ac.uk/v3/search/works',
-            fixtureUrl: '/core-search-fixture.json',
+            coreBaseUrl: '/api/core/works',
           },
         },
       ],
@@ -32,14 +30,14 @@ describe('ResearchStore', () => {
 
   it('cancels the stale HTTP search when a newer search starts', () => {
     store.search('first query', 10);
-    const first = http.expectOne('/core-search-fixture.json');
+    const first = http.expectOne((request) => request.url === '/api/core/works');
     store.search('newest query', 20);
-    const second = http.expectOne('/core-search-fixture.json');
+    const second = http.expectOne((request) => request.url === '/api/core/works');
 
     expect(first.cancelled).toBe(true);
     second.flush({
-      total_hits: 1,
-      results: [{ id: 1, title: 'Newest result', year_published: 2025 }],
+      totalHits: 1,
+      results: [{ id: 1, title: 'Newest result', yearPublished: 2025 }],
     });
 
     expect(store.result()?.query).toBe('newest query');
@@ -55,7 +53,7 @@ describe('ResearchStore', () => {
   ])('maps HTTP %i to a clear error', (status, messagePart) => {
     store.search('drone', 10);
     http
-      .expectOne('/core-search-fixture.json')
+      .expectOne((request) => request.url === '/api/core/works')
       .flush({}, { status: status as number, statusText: 'Error' });
 
     expect(store.isError()).toBe(true);
@@ -64,9 +62,11 @@ describe('ResearchStore', () => {
 
   it('ignores cancellation as stale work rather than displaying an error', () => {
     store.search('old', 10);
-    const oldRequest = http.expectOne('/core-search-fixture.json');
+    const oldRequest = http.expectOne((request) => request.url === '/api/core/works');
     store.search('new', 10);
-    http.expectOne('/core-search-fixture.json').flush({ total_hits: 0, results: [] });
+    http
+      .expectOne((request) => request.url === '/api/core/works')
+      .flush({ totalHits: 0, results: [] });
 
     expect(oldRequest.cancelled).toBe(true);
     expect(store.isEmpty()).toBe(true);
@@ -75,7 +75,7 @@ describe('ResearchStore', () => {
   it('explains when the server-side CORE key is not configured', () => {
     store.search('drone', 10);
     http
-      .expectOne('/core-search-fixture.json')
+      .expectOne((request) => request.url === '/api/core/works')
       .flush({ code: 'CORE_API_KEY_MISSING' }, { status: 503, statusText: 'Service Unavailable' });
 
     expect(store.errorMessage()).toContain('CORE_API_KEY');

@@ -18,12 +18,8 @@
           type="text"
           formControlName="query"
           autocomplete="off"
-          [attr.aria-describedby]="validationMessage() ? 'query-help query-error' : 'query-help'"
+          [attr.aria-describedby]="validationMessage() ? 'query-error' : null"
         />
-        <p id="query-help" class="sr-only">
-          Example Boolean query: drone AND, open parenthesis, package OR delivery, close
-          parenthesis.
-        </p>
       </div>
 
       <div class="form-field limit-field">
@@ -48,7 +44,6 @@
         Search
       </button>
     </form>
-    <p class="fixture-note">Live results are requested securely through the application server.</p>
   </section>
 
   <section id="main-content" class="results-section" aria-labelledby="results-heading">
@@ -61,11 +56,6 @@
 
     @if (store.isLoading()) {
       <p class="status" role="status">Searching CORE...</p>
-      <div class="paper-grid" aria-hidden="true">
-        @for (item of [1, 2, 3]; track item) {
-          <div class="paper-card skeleton"><span></span><span></span><span></span></div>
-        }
-      </div>
     } @else if (store.isError()) {
       <div class="state error-state" role="alert">
         <h3>Search unavailable</h3>
@@ -92,41 +82,51 @@
       />
 
       <div class="paper-grid">
-        @for (paper of result.papers; track paperTrack($index, paper)) {
+        @for (paper of result.papers; track paper.id ?? $index) {
           <article class="paper-card">
-            <h3>{{ paper.title }}</h3>
-            <p class="metadata">
-              {{ paper.authors.length ? paper.authors.join(', ') : 'Author unavailable' }}
-              @if (paper.publishedYear) {
-                <span> · {{ paper.publishedYear }}</span>
-              }
-            </p>
+            @if (paper.title) {
+              <h3>{{ paper.title }}</h3>
+            }
+            @if (paper.authors.length || paper.publishedYear) {
+              <p class="metadata">
+                @if (paper.authors.length) {
+                  {{ paper.authors.join(', ') }}
+                }
+                @if (paper.publishedYear) {
+                  <span>{{ paper.authors.length ? ' · ' : '' }}{{ paper.publishedYear }}</span>
+                }
+              </p>
+            }
             @if (paper.publisher) {
               <p class="publisher">{{ paper.publisher }}</p>
             }
             @if (paper.abstract) {
               <p class="abstract">{{ paper.abstract }}</p>
-            } @else {
-              <p class="abstract unavailable">Abstract unavailable</p>
             }
-            <div class="paper-links">
-              @if (paper.sourceUrl) {
-                <a [href]="paper.sourceUrl" target="_blank" rel="noopener noreferrer"
-                  >View source</a
-                >
-              }
-              @if (paper.downloadUrl) {
-                <a [href]="paper.downloadUrl" target="_blank" rel="noopener noreferrer">Download</a>
-              }
-              @if (paper.doi) {
-                <a
-                  [href]="paper.doi.startsWith('http') ? paper.doi : 'https://doi.org/' + paper.doi"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  >DOI</a
-                >
-              }
-            </div>
+            @if (paper.sourceUrl || paper.downloadUrl || paper.doi) {
+              <div class="paper-links">
+                @if (paper.sourceUrl) {
+                  <a [href]="paper.sourceUrl" target="_blank" rel="noopener noreferrer"
+                    >View source</a
+                  >
+                }
+                @if (paper.downloadUrl) {
+                  <a [href]="paper.downloadUrl" target="_blank" rel="noopener noreferrer"
+                    >Download</a
+                  >
+                }
+                @if (paper.doi) {
+                  <a
+                    [href]="
+                      paper.doi.startsWith('http') ? paper.doi : 'https://doi.org/' + paper.doi
+                    "
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >DOI</a
+                  >
+                }
+              </div>
+            }
           </article>
         }
       </div>

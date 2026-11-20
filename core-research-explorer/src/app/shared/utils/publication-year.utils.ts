@@ -9,7 +9,6 @@ export interface PublicationYearAnalytics {
   counts: PublicationYearCount[];
   includedCount: number;
   missingCount: number;
-  maximumCount: number;
 }
 
 const EARLIEST_PLAUSIBLE_PUBLICATION_YEAR = 1800;
@@ -43,6 +42,5 @@ export function aggregatePublicationYears(
     counts: sortedCounts,
     includedCount: papers.length - missingCount,
     missingCount,
-    maximumCount: sortedCounts.reduce((maximum, item) => Math.max(maximum, item.count), 0),
   };
 }

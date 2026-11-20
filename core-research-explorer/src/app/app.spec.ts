@@ -15,9 +15,7 @@ describe('App', () => {
         {
           provide: CORE_API_CONFIG,
           useValue: {
-            mode: 'fixture',
-            coreBaseUrl: 'https://api.core.ac.uk/v3/search/works',
-            fixtureUrl: '/core-search-fixture.json',
+            coreBaseUrl: '/api/core/works',
           },
         },
       ],
@@ -41,7 +39,7 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('#query')).toBeTruthy();
+    expect((compiled.querySelector('#query') as HTMLInputElement).value).toBe('');
     expect(compiled.querySelectorAll('#limit option').length).toBe(3);
   });
 
@@ -51,15 +49,17 @@ describe('App', () => {
     const http = TestBed.inject(HttpTestingController);
 
     store.search('drone', 10);
-    http.expectOne('/core-search-fixture.json').flush({
-      total_hits: 20,
-      results: [
-        { id: 1, title: 'One', year_published: 2024 },
-        { id: 2, title: 'Two', year_published: 2022 },
-        { id: 3, title: 'Three', year_published: 2024 },
-        { id: 4, title: 'Four', year_published: null },
-      ],
-    });
+    http
+      .expectOne((request) => request.url === '/api/core/works')
+      .flush({
+        totalHits: 20,
+        results: [
+          { id: 1, title: 'One', yearPublished: 2024 },
+          { id: 2, title: 'Two', yearPublished: 2022 },
+          { id: 3, title: 'Three', yearPublished: 2024 },
+          { id: 4, title: 'Four', yearPublished: null },
+        ],
+      });
 
     await fixture.whenStable();
     fixture.detectChanges();
@@ -69,7 +69,7 @@ describe('App', () => {
     expect(compiled.querySelector('.exclusion-note')?.textContent).toContain('1 paper(s)');
   });
 
-  it('shows loading then a fixture empty state', async () => {
+  it('shows loading then an empty state', async () => {
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
     const store = fixture.debugElement.injector.get(ResearchStore);
@@ -81,12 +81,34 @@ describe('App', () => {
       'Searching CORE',
     );
 
-    http.expectOne('/core-search-fixture.json').flush({ total_hits: 0, results: [] });
+    http
+      .expectOne((request) => request.url === '/api/core/works')
+      .flush({ totalHits: 0, results: [] });
     await fixture.whenStable();
     fixture.detectChanges();
     expect(
       (fixture.nativeElement as HTMLElement).querySelector('.state h3')?.textContent,
     ).toContain('No papers found');
+  });
+
+  it('omits missing metadata instead of rendering invented values', async () => {
+    const fixture = TestBed.createComponent(App);
+    const store = fixture.debugElement.injector.get(ResearchStore);
+    const http = TestBed.inject(HttpTestingController);
+
+    store.search('incomplete metadata', 10);
+    http
+      .expectOne((request) => request.url === '/api/core/works')
+      .flush({
+        totalHits: 1,
+        results: [{ id: null, title: null, authors: null, abstract: null }],
+      });
+
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.paper-card')).toBeNull();
+    expect(compiled.querySelector('.state h3')?.textContent).toContain('No papers found');
   });
 
   it('shows a clear error and retry control', async () => {
@@ -97,7 +119,7 @@ describe('App', () => {
 
     store.search('drone', 10);
     http
-      .expectOne('/core-search-fixture.json')
+      .expectOne((request) => request.url === '/api/core/works')
       .flush({ message: 'rate limited' }, { status: 429, statusText: 'Too Many Requests' });
     await fixture.whenStable();
     fixture.detectChanges();
@@ -121,9 +143,11 @@ describe('App', () => {
     fixture.detectChanges();
 
     const http = TestBed.inject(HttpTestingController);
-    http.expectOne('/core-search-fixture.json').flush({
-      total_hits: 1,
-      results: [{ id: 1, title: 'Keyboard result', year_published: 2024 }],
-    });
+    http
+      .expectOne((request) => request.url === '/api/core/works')
+      .flush({
+        totalHits: 1,
+        results: [{ id: 1, title: 'Keyboard result', yearPublished: 2024 }],
+      });
   });
 });

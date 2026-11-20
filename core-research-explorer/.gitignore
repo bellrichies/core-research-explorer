@@ -34,7 +34,6 @@ debug.log*
 .env
 .env.*
 
-!.env.example
 .sass-cache/
 /connect.lock
 /coverage

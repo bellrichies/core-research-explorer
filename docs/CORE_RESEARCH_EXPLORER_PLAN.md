@@ -61,16 +61,16 @@ GET https://api.core.ac.uk/v3/search/works?q=drone%20AND%20(package%20OR%20deliv
 5. Rate limits, errors, CORS behavior and whether aggregation is available.
 6. Whether the intended deployment can securely access the API.
 
-Record findings in `docs/core-api-contract.md` with sample sanitized responses and references. If a private key is required, implement a BFF that stores it in server environment variables. **Never commit credentials or put secrets in Angular environment files or client bundles.** If access is unavailable, continue UI development with fixtures, but explicitly identify live integration as blocked; do not present mocked data as real API results.
+Record findings in `docs/core-api-contract.md` with references. If a private key is required, implement a BFF that stores it in server environment variables. **Never commit credentials or put secrets in Angular environment files or client bundles.** Do not add a local or fallback application data feed when live access is unavailable; expose the configuration or upstream error explicitly.
 
 ## 4. User experience and screens
 
 ### Primary page layout
 
 1. Header: app name, short description.
-2. Search area: Boolean query input, example query, submit button, result count selector.
+2. Search area: Boolean query input, submit button, result count selector.
 3. Results summary: query, retrieved count, total hits if API provides it, active filters.
-4. Results area: responsive paper cards, skeletons, empty state, retry/error state.
+4. Results area: responsive paper cards, accessible loading status, empty state, retry/error state.
 5. Analytics area: publication-year bar chart with clear dataset scope.
 
 ### Search behavior
@@ -90,12 +90,12 @@ Record findings in `docs/core-api-contract.md` with sample sanitized responses a
 - Title, authors, year, short abstract with expand/collapse.
 - DOI, publisher and publication link where present.
 - External links use safe URLs and `rel="noopener noreferrer"` where applicable.
-- Graceful fallbacks for missing data.
+- Omit unavailable metadata rather than fabricating display values.
 
 ### States
 
-- Initial: show instructions, sample query and no chart.
-- Loading: accessible progress indication and skeleton cards.
+- Initial: show instructions and no chart.
+- Loading: accessible progress indication without decorative stand-ins.
 - Success: list and chart updated from the same result set.
 - Empty: explain no results and suggest broadening the query.
 - Error: meaningful explanation and retry; distinguish 401/403, 429, network and 5xx.
@@ -110,8 +110,8 @@ Use an internal model that does not expose raw third-party response shape to com
 
 ```ts
 export interface ResearchPaper {
-  id: string;
-  title: string;
+  id: string | null;
+  title: string | null;
   authors: string[];
   abstract: string | null;
   publishedYear: number | null;
@@ -138,7 +138,7 @@ Create a dedicated mapper after inspecting actual API responses. Validate/coerce
 - Avoid retrying authentication errors; respect `Retry-After` for 429 if available.
 - Avoid logging keys or sensitive headers.
 - Preserve an understandable user-visible error state.
-- Unit-test the adapter with mock HTTP responses.
+- Unit-test the adapter with intercepted HTTP responses.
 
 ## 6. Analytics
 
@@ -152,7 +152,7 @@ Algorithm:
 4. Sort years ascending.
 5. Render a bar chart with axes, accessible labels and empty state.
 
-Include a note such as **“Publication years among 50 retrieved papers; not all CORE matches.”** Optionally show the number excluded for missing years. Do not label sample aggregates as database-wide statistics. Only add all-match aggregation after verifying that CORE supports it or after implementing a documented, bounded collection strategy.
+Include a note such as **“Publication years among 50 retrieved papers; not all CORE matches.”** Optionally show the number excluded for missing years. Do not label retrieved-set aggregates as database-wide statistics. Only add all-match aggregation after verifying that CORE supports it or after implementing a documented, bounded collection strategy.
 
 Optional summary metrics: retrieved paper count, year range and DOI coverage.
 
@@ -180,7 +180,6 @@ core-research-explorer/
 │   │   ├── shared/
 │   │   │   ├── components/empty-state/
 │   │   │   ├── components/error-state/
-│   │   │   ├── components/loading-skeleton/
 │   │   │   └── utils/boolean-query.utils.ts
 │   │   ├── app.config.ts
 │   │   ├── app.routes.ts
@@ -193,7 +192,6 @@ core-research-explorer/
 │   ├── core-api-contract.md
 │   └── decisions/
 ├── .github/workflows/ci.yml
-├── .env.example                    # Placeholder names only; no real secrets
 ├── README.md
 └── package.json
 ```
@@ -209,7 +207,7 @@ Adjust generated filenames to the Angular CLI version actually installed.
 - [ ] Enable strict typing, linting, formatting and baseline tests.
 - [ ] Verify CORE authentication, Boolean search, pagination and response format.
 - [ ] Decide direct API vs BFF from observed security constraints.
-- [ ] Document contract and add sanitized fixture data.
+- [ ] Document the verified contract and external access blockers.
 - [ ] Commit a working baseline.
 
 **Exit:** App builds and serves; API approach is documented; successful real request demonstrated or external access blocker recorded.
@@ -307,20 +305,20 @@ Use genuine commits in chronological implementation order. Do not fabricate a co
 
 ## 11. Risk register
 
-| Risk                                    | Priority | Mitigation                                                          |
-| --------------------------------------- | -------- | ------------------------------------------------------------------- |
-| CORE requires private credentials       | High     | Validate early; use server-side BFF                                 |
-| CORE API unavailable or quota exhausted | High     | Explicit blocked status, fixtures for UI tests, rate-limit handling |
-| CORS blocks browser calls               | High     | Secure BFF rather than unsafe browser workarounds                   |
-| API schema changes                      | Medium   | Mapping boundary and fixture tests                                  |
-| Unsupported Boolean syntax              | Medium   | Validate against documentation and real queries                     |
-| Large result sets                       | Medium   | Bounded count, pagination, request cancellation                     |
-| Missing publication years               | Low      | Exclude and disclose chart omissions                                |
-| Secret exposure                         | High     | Env vars server-side, secret scanning, no client keys               |
+| Risk                                    | Priority | Mitigation                                                             |
+| --------------------------------------- | -------- | ---------------------------------------------------------------------- |
+| CORE requires private credentials       | High     | Validate early; use server-side BFF                                    |
+| CORE API unavailable or quota exhausted | High     | Explicit error status, intercepted test responses, rate-limit handling |
+| CORS blocks browser calls               | High     | Secure BFF rather than unsafe browser workarounds                      |
+| API schema changes                      | Medium   | Mapping boundary and contract tests                                    |
+| Unsupported Boolean syntax              | Medium   | Validate against documentation and real queries                        |
+| Large result sets                       | Medium   | Bounded count, pagination, request cancellation                        |
+| Missing publication years               | Low      | Exclude and disclose chart omissions                                   |
+| Secret exposure                         | High     | Env vars server-side, secret scanning, no client keys                  |
 
 ## 12. Optional enhancements (only after MVP)
 
-**P1:** shareable search URL, recent queries, loading skeletons, improved error states.
+**P1:** shareable search URL, recent queries, improved error states.
 
 **P2:** publication-date sorting, CSV export, dark mode.
 

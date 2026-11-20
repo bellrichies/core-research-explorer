@@ -12,9 +12,7 @@ export const appConfig: ApplicationConfig = {
     {
       provide: CORE_API_CONFIG,
       useValue: {
-        mode: 'core',
         coreBaseUrl: '/api/core/works',
-        fixtureUrl: '/core-search-fixture.json',
       },
     },
   ],

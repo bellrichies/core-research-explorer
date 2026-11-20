@@ -12,12 +12,6 @@ export class CoreApiService {
   search(query: string, limit: number): Observable<ResearchSearchResult> {
     const safeLimit = this.boundLimit(limit);
 
-    if (this.config.mode === 'fixture') {
-      return this.http
-        .get<unknown>(this.config.fixtureUrl)
-        .pipe(map((payload) => this.mapResponse(payload, query, safeLimit)));
-    }
-
     const params = new HttpParams()
       .set('q', query)
       .set('offset', '0')
@@ -36,8 +30,11 @@ export class CoreApiService {
   private mapResponse(payload: unknown, query: string, limit: number): ResearchSearchResult {
     const record = this.asRecord(payload);
     const rawResults = Array.isArray(record?.['results']) ? record['results'] : [];
-    const totalHits = this.asFiniteNumber(record?.['total_hits']);
-    const papers = rawResults.map((item, index) => this.mapPaper(item, index)).slice(0, limit);
+    const totalHits = this.asFiniteNumber(record?.['totalHits'] ?? record?.['total_hits']);
+    const papers = rawResults
+      .map((item) => this.mapPaper(item))
+      .filter((paper) => this.hasDisplayableMetadata(paper))
+      .slice(0, limit);
 
     return {
       papers,
@@ -47,11 +44,9 @@ export class CoreApiService {
     };
   }
 
-  private mapPaper(value: unknown, index: number): ResearchPaper {
+  private mapPaper(value: unknown): ResearchPaper {
     const record = this.asRecord(value) ?? {};
-    const authors = Array.isArray(record['authors'])
-      ? record['authors'].filter((author): author is string => typeof author === 'string')
-      : [];
+    const authors = this.mapAuthors(record['authors']);
     const links = Array.isArray(record['links'])
       ? record['links'].map((link) => this.asRecord(link)).filter((link) => link !== null)
       : [];
@@ -59,12 +54,14 @@ export class CoreApiService {
       record['sourceUrl'],
       record['source_url'],
       ...links.map((link) => link['url']),
+      ...this.asStringArray(record['sourceFulltextUrls']),
       ...this.asStringArray(record['source_fulltext_urls']),
     ]);
     const doi = this.firstString([record['doi']]);
     const downloadUrl = this.firstString([
       record['downloadUrl'],
       record['download_url'],
+      ...this.asStringArray(record['sourceFulltextUrls']),
       ...this.asStringArray(record['source_fulltext_urls']),
     ]);
     const publisher = this.firstString([record['publisher'], record['publisher_name']]);
@@ -75,14 +72,14 @@ export class CoreApiService {
         ? rawId.trim()
         : typeof rawId === 'number'
           ? String(rawId)
-          : `paper-${index + 1}`;
+          : null;
 
     return {
       id,
-      title: this.firstString([record['title']]) ?? 'Untitled research paper',
+      title: this.firstString([record['title']]),
       authors,
       abstract: this.firstString([record['abstract'], record['description']]),
-      publishedYear: this.asPublishedYear(record['year_published']),
+      publishedYear: this.asPublishedYear(record['yearPublished'] ?? record['year_published']),
       doi,
       sourceUrl,
       downloadUrl,
@@ -93,6 +90,30 @@ export class CoreApiService {
   private asPublishedYear(value: unknown): number | null {
     const year = typeof value === 'number' ? value : Number(value);
     return Number.isInteger(year) && year >= 1800 && year <= 2200 ? year : null;
+  }
+
+  private mapAuthors(value: unknown): string[] {
+    if (!Array.isArray(value)) return [];
+
+    return value
+      .map((author) => {
+        if (typeof author === 'string') return author.trim() || null;
+        return this.firstString([this.asRecord(author)?.['name']]);
+      })
+      .filter((author): author is string => author !== null);
+  }
+
+  private hasDisplayableMetadata(paper: ResearchPaper): boolean {
+    return Boolean(
+      paper.title ||
+      paper.authors.length ||
+      paper.abstract ||
+      paper.publishedYear ||
+      paper.doi ||
+      paper.sourceUrl ||
+      paper.downloadUrl ||
+      paper.publisher,
+    );
   }
 
   private asFiniteNumber(value: unknown): number | null {

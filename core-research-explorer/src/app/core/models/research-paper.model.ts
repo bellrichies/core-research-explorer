@@ -1,6 +1,6 @@
 export interface ResearchPaper {
-  id: string;
-  title: string;
+  id: string | null;
+  title: string | null;
   authors: string[];
   abstract: string | null;
   publishedYear: number | null;

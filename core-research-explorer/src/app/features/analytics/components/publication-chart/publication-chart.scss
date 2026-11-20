@@ -77,62 +77,11 @@ h3 {
   width: 100%;
   height: clamp(14rem, 30vw, 18rem);
   min-width: 0;
-  opacity: 0;
-  transition: opacity 180ms ease;
-}
-
-.year-chart.is-ready {
-  opacity: 1;
 }
 
 .year-chart:focus-visible {
   outline: 3px solid #f0a500;
   outline-offset: 3px;
-}
-
-.chart-stage {
-  position: relative;
-  min-height: clamp(14rem, 30vw, 18rem);
-}
-
-.chart-fallback {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(2.75rem, 1fr);
-  align-items: end;
-  gap: 0.4rem;
-  overflow-x: auto;
-  padding: 1rem 0.35rem 0;
-  border-bottom: 1px solid #7a919f;
-}
-
-.chart-fallback:focus-visible {
-  outline: 3px solid #f0a500;
-  outline-offset: 3px;
-}
-
-.fallback-bar-group {
-  display: grid;
-  grid-template-rows: 1.25rem 10rem 1.4rem;
-  align-items: end;
-  text-align: center;
-}
-
-.fallback-value,
-.fallback-year {
-  color: #405669;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.fallback-bar {
-  width: min(100%, 2.5rem);
-  min-height: 0.2rem;
-  justify-self: center;
-  border-radius: 0.3rem 0.3rem 0 0;
-  background: #176b87;
 }
 
 .exclusion-note {

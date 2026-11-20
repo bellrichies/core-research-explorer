@@ -14,8 +14,8 @@ function sendJson(response, status, payload, headers = {}) {
   response.end(JSON.stringify(payload));
 }
 
-function parsePositiveInteger(value, fallback) {
-  if (value === null) return fallback;
+function parsePositiveInteger(value, defaultValue) {
+  if (value === null) return defaultValue;
   if (!/^\d+$/.test(value)) return null;
   return Number(value);
 }

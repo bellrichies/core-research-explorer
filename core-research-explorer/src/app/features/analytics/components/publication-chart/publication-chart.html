@@ -24,46 +24,22 @@
         ><strong>{{ analytics().missingCount }}</strong> excluded</span
       >
     </div>
-    <div class="chart-stage">
-      <div
-        #chart
-        class="year-chart"
-        [class.is-ready]="chartReady()"
-        role="img"
-        [attr.tabindex]="chartReady() ? 0 : -1"
-        [attr.aria-hidden]="!chartReady()"
-        [attr.aria-label]="
-          'Bar chart of publication years for ' +
-          analytics().includedCount +
-          ' of ' +
-          retrievedCount() +
-          ' retrieved papers. ' +
-          analytics().missingCount +
-          ' papers excluded because the year is missing or invalid.'
-        "
-      ></div>
-
-      @if (!chartReady()) {
-        <div
-          class="chart-fallback"
-          role="img"
-          tabindex="0"
-          aria-label="Publication-year bar chart loading. Exact counts follow in the data table."
-        >
-          @for (item of analytics().counts; track item.year) {
-            <div class="fallback-bar-group">
-              <span class="fallback-value">{{ item.count }}</span>
-              <span
-                class="fallback-bar"
-                [style.height.%]="(item.count / analytics().maximumCount) * 100"
-                aria-hidden="true"
-              ></span>
-              <span class="fallback-year">{{ item.year }}</span>
-            </div>
-          }
-        </div>
-      }
-    </div>
+    <div
+      #chart
+      class="year-chart"
+      role="img"
+      [attr.tabindex]="chartReady() ? 0 : -1"
+      [attr.aria-hidden]="!chartReady()"
+      [attr.aria-label]="
+        'Bar chart of publication years for ' +
+        analytics().includedCount +
+        ' of ' +
+        retrievedCount() +
+        ' retrieved papers. ' +
+        analytics().missingCount +
+        ' papers excluded because the year is missing or invalid.'
+      "
+    ></div>
 
     <table class="sr-only">
       <caption>

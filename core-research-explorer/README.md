@@ -11,14 +11,9 @@ server-side proxy so the CORE API key is never included in browser code.
 
 ## Configure live CORE search
 
-Copy `.env.example` to `.env` and replace the placeholder value:
-
-```dotenv
-CORE_API_KEY=your_real_core_api_key
-```
-
-`.env` is ignored by Git. Do not put the key in Angular environment files, frontend source, or a
-committed configuration file.
+Create an untracked `.env` file and assign your actual CORE API key to `CORE_API_KEY`. `.env` is
+ignored by Git. Do not put the key in Angular environment files, frontend source, or a committed
+configuration file.
 
 ## Run locally
 
@@ -52,7 +47,8 @@ npm run test:e2e
 npm run build
 ```
 
-Unit tests use fixtures and mocked upstream requests. They do not consume the live CORE quota.
+Automated tests intercept HTTP calls with test-owned responses. The running application has no
+local or fallback data feed, and tests do not consume the live CORE quota.
 
 ## Production deployment
 
@@ -67,5 +63,3 @@ development proxy is not a production reverse proxy.
 - The application requests at most 50 records and currently supports only the first result page.
 - Live Boolean grammar and the maximum supported CORE page size must still be confirmed with a
   successful authenticated request.
-- The fixture in `public/core-search-fixture.json` is test data and is not presented by the running
-  application as a live search result.

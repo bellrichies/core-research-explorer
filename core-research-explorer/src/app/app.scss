@@ -77,12 +77,6 @@
   margin-top: 0;
 }
 
-.fixture-note {
-  margin: 0.75rem 0 0;
-  color: #3e596e;
-  font-size: 0.8rem;
-}
-
 form {
   display: grid;
   grid-template-columns: minmax(16rem, 1fr) 6.5rem auto;
@@ -212,10 +206,6 @@ app-publication-chart {
   -webkit-line-clamp: 3;
 }
 
-.unavailable {
-  font-style: italic;
-}
-
 .paper-links {
   display: flex;
   flex-wrap: wrap;
@@ -231,22 +221,6 @@ app-publication-chart {
 
 .state {
   margin-top: 1rem;
-}
-
-.skeleton span {
-  display: block;
-  height: 1rem;
-  margin-bottom: 0.75rem;
-  border-radius: 0.25rem;
-  background: #dce5ea;
-}
-
-.skeleton span:nth-child(2) {
-  width: 72%;
-}
-
-.skeleton span:nth-child(3) {
-  width: 90%;
 }
 
 @media (max-width: 42rem) {

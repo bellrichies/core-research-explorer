@@ -7,28 +7,28 @@ test('sends a Boolean query and count, then renders chart and keyboard-operable 
     await route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({
-        total_hits: 20,
+        totalHits: 20,
         results: [
           {
             id: 1,
-            title: 'Fixture drone delivery',
+            title: 'Drone delivery systems',
             authors: [],
             abstract: null,
-            year_published: 2024,
+            yearPublished: 2024,
           },
           {
             id: 2,
-            title: 'Second fixture paper',
-            authors: ['Example Author'],
-            abstract: 'Fixture abstract',
-            year_published: 2022,
+            title: 'Last-mile aerial logistics',
+            authors: ['Research Author'],
+            abstract: 'Research abstract',
+            yearPublished: 2022,
           },
           {
             id: 3,
-            title: 'Missing year fixture',
+            title: 'Autonomous delivery research',
             authors: null,
             abstract: null,
-            year_published: null,
+            yearPublished: null,
           },
         ],
       }),
@@ -51,18 +51,17 @@ test('sends a Boolean query and count, then renders chart and keyboard-operable 
   await expect(page.getByLabel('Number of papers')).toBeFocused();
 });
 
-test('shows loading, missing metadata, empty, and error states with fixture routes', async ({
-  page,
-}) => {
+test('shows loading, empty, and error states with intercepted API responses', async ({ page }) => {
   await page.route('**/api/core/works**', async (route) => {
     await new Promise((resolve) => setTimeout(resolve, 150));
     await route.fulfill({
       contentType: 'application/json',
-      body: JSON.stringify({ total_hits: 0, results: [] }),
+      body: JSON.stringify({ totalHits: 0, results: [] }),
     });
   });
 
   await page.goto('/');
+  await page.getByLabel('Boolean query').fill('drone delivery');
   await page.getByRole('button', { name: 'Search' }).click();
   await expect(page.getByText('Searching CORE...')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'No papers found' })).toBeVisible();
