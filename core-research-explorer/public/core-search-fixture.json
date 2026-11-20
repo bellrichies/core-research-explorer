@@ -1,0 +1,22 @@
+{
+  "total_hits": 1,
+  "limit": 1,
+  "offset": 0,
+  "results": [
+    {
+      "id": 123456,
+      "title": "Sanitized fixture title",
+      "authors": ["Example Author"],
+      "abstract": "Sanitized fixture abstract. This is not live CORE data.",
+      "year_published": 2024,
+      "published_date": "2024-01-01T00:00:00",
+      "doi": null,
+      "download_url": null,
+      "publisher": null,
+      "links": [],
+      "source_fulltext_urls": []
+    }
+  ],
+  "tooks": [],
+  "search_id": "SANITIZED-FIXTURE"
+}
