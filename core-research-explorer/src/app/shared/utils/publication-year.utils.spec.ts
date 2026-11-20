@@ -1,0 +1,52 @@
+import { ResearchPaper } from '../../core/models/research-paper.model';
+import { aggregatePublicationYears } from './publication-year.utils';
+
+function paper(id: string, publishedYear: number | null): ResearchPaper {
+  return {
+    id,
+    title: id,
+    authors: [],
+    abstract: null,
+    publishedYear,
+    doi: null,
+    sourceUrl: null,
+    downloadUrl: null,
+    publisher: null,
+  };
+}
+
+describe('aggregatePublicationYears', () => {
+  it('groups and sorts valid retrieved-paper years', () => {
+    const result = aggregatePublicationYears([
+      paper('1', 2024),
+      paper('2', 2022),
+      paper('3', 2024),
+    ]);
+
+    expect(result.counts).toEqual([
+      { year: 2022, count: 1 },
+      { year: 2024, count: 2 },
+    ]);
+    expect(result.maximumCount).toBe(2);
+    expect(result.missingCount).toBe(0);
+  });
+
+  it('excludes null and implausible years', () => {
+    const result = aggregatePublicationYears([
+      paper('1', null),
+      paper('2', 1700),
+      paper('3', 2020),
+    ]);
+
+    expect(result.counts).toEqual([{ year: 2020, count: 1 }]);
+    expect(result.missingCount).toBe(2);
+  });
+
+  it('returns empty analytics for no papers', () => {
+    expect(aggregatePublicationYears([])).toEqual({
+      counts: [],
+      missingCount: 0,
+      maximumCount: 0,
+    });
+  });
+});

@@ -5,6 +5,21 @@
   background: #f4f7f9;
 }
 
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -5rem;
+  z-index: 10;
+  padding: 0.75rem 1rem;
+  color: #fff;
+  background: #183a5a;
+  border-radius: 0.4rem;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
 .app-header {
   padding: 2rem clamp(1rem, 5vw, 4rem);
   color: #fff;
@@ -109,6 +124,72 @@ button:disabled {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
   gap: 1rem;
   margin-top: 1rem;
+}
+
+.analytics-panel {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border: 1px solid #b9cad7;
+  border-radius: 0.75rem;
+  background: #f9fbfc;
+}
+
+.analytics-panel h3,
+.analytics-panel h4,
+.scope-note,
+.chart-summary {
+  margin-top: 0;
+}
+
+.scope-note,
+.chart-summary,
+.chart-empty {
+  color: #405669;
+}
+
+.year-chart {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(3.25rem, 1fr);
+  align-items: end;
+  gap: clamp(0.35rem, 1.5vw, 0.75rem);
+  min-height: 15rem;
+  overflow-x: auto;
+  padding: 1rem 0.5rem 0;
+  border-bottom: 2px solid #405669;
+}
+
+.year-bar-group {
+  display: grid;
+  grid-template-rows: 1.25rem 11.5rem 1.5rem;
+  align-items: end;
+  text-align: center;
+}
+
+.bar-value,
+.bar-year {
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.year-bar {
+  width: min(100%, 4.5rem);
+  min-height: 0.25rem;
+  justify-self: center;
+  border-radius: 0.35rem 0.35rem 0 0;
+  background: #176b87;
+}
+
+.chart-empty {
+  padding: 1rem;
+  border: 1px dashed #7a919f;
+  border-radius: 0.5rem;
+  background: #fff;
+}
+
+:focus-visible {
+  outline: 3px solid #f0a500;
+  outline-offset: 3px;
 }
 
 .paper-card {
