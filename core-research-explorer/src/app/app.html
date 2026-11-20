@@ -4,11 +4,104 @@
 </header>
 
 <main class="app-main">
-  <section class="foundation-status" aria-labelledby="foundation-heading">
-    <h2 id="foundation-heading">Foundation ready</h2>
-    <p>
-      The Angular workspace is initialized. Live CORE search remains blocked until authentication,
-      pagination, and the real response contract are verified.
+  <section class="search-panel" aria-labelledby="search-heading">
+    <h2 id="search-heading">Search CORE</h2>
+    <p class="fixture-note">
+      Development mode uses the sanitized fixture. Live CORE access is blocked until credentials and
+      CORS behavior are verified.
     </p>
+    <form [formGroup]="searchForm" (ngSubmit)="submitSearch()" novalidate>
+      <label for="query">Boolean query</label>
+      <input id="query" type="text" formControlName="query" autocomplete="off" />
+      <p class="example">Example: drone AND (package OR delivery)</p>
+
+      <label for="limit">Number of papers</label>
+      <select id="limit" formControlName="limit">
+        @for (count of resultCounts; track count) {
+          <option [ngValue]="count">{{ count }}</option>
+        }
+      </select>
+
+      @if (validationMessage(); as message) {
+        <p class="validation" role="alert">{{ message }}</p>
+      }
+
+      <button type="submit" [disabled]="store.isLoading()">Search</button>
+    </form>
+  </section>
+
+  <section class="results-section" aria-labelledby="results-heading">
+    <h2 id="results-heading">Results</h2>
+
+    @if (store.isLoading()) {
+      <p class="status" role="status">Searching CORE...</p>
+      <div class="paper-grid" aria-hidden="true">
+        @for (item of [1, 2, 3]; track item) {
+          <div class="paper-card skeleton"><span></span><span></span><span></span></div>
+        }
+      </div>
+    } @else if (store.isError()) {
+      <div class="state error-state" role="alert">
+        <h3>Search unavailable</h3>
+        <p>{{ store.errorMessage() }}</p>
+        <button type="button" (click)="retry()">Retry</button>
+      </div>
+    } @else if (store.isEmpty()) {
+      <div class="state">
+        <h3>No papers found</h3>
+        <p>Try broadening the Boolean query or removing one of the operators.</p>
+      </div>
+    } @else if (store.result(); as result) {
+      <p class="results-summary">
+        Retrieved {{ result.retrievedCount }} paper(s) for <strong>{{ result.query }}</strong>.
+        @if (result.totalHits !== null) {
+          CORE reported {{ result.totalHits }} total match(es).
+        }
+      </p>
+      <div class="paper-grid">
+        @for (paper of result.papers; track paperTrack($index, paper)) {
+          <article class="paper-card">
+            <h3>{{ paper.title }}</h3>
+            <p class="metadata">
+              {{ paper.authors.length ? paper.authors.join(', ') : 'Author unavailable' }}
+              @if (paper.publishedYear) {
+                <span> · {{ paper.publishedYear }}</span>
+              }
+            </p>
+            @if (paper.publisher) {
+              <p class="publisher">{{ paper.publisher }}</p>
+            }
+            @if (paper.abstract) {
+              <p class="abstract">{{ paper.abstract }}</p>
+            } @else {
+              <p class="abstract unavailable">Abstract unavailable</p>
+            }
+            <div class="paper-links">
+              @if (paper.sourceUrl) {
+                <a [href]="paper.sourceUrl" target="_blank" rel="noopener noreferrer"
+                  >View source</a
+                >
+              }
+              @if (paper.downloadUrl) {
+                <a [href]="paper.downloadUrl" target="_blank" rel="noopener noreferrer">Download</a>
+              }
+              @if (paper.doi) {
+                <a
+                  [href]="paper.doi.startsWith('http') ? paper.doi : 'https://doi.org/' + paper.doi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >DOI</a
+                >
+              }
+            </div>
+          </article>
+        }
+      </div>
+    } @else {
+      <div class="state">
+        <h3>Ready to search</h3>
+        <p>Enter a Boolean query and choose how many papers to retrieve.</p>
+      </div>
+    }
   </section>
 </main>

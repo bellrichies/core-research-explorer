@@ -28,13 +28,135 @@
   padding: clamp(1.5rem, 5vw, 4rem) clamp(1rem, 5vw, 4rem);
 }
 
-.foundation-status {
+.search-panel,
+.results-section,
+.state,
+.paper-card {
   padding: 1.25rem;
   border: 1px solid #b9cad7;
   border-radius: 0.75rem;
   background: #fff;
 }
 
-.foundation-status h2 {
+.search-panel h2,
+.results-section h2,
+.state h3,
+.paper-card h3 {
   margin-top: 0;
+}
+
+.fixture-note {
+  color: #3e596e;
+}
+
+form {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 48rem;
+}
+
+label {
+  font-weight: 700;
+}
+
+input,
+select,
+button {
+  min-height: 44px;
+  border-radius: 0.4rem;
+  font: inherit;
+}
+
+input,
+select {
+  width: 100%;
+  border: 1px solid #7a919f;
+  padding: 0.65rem 0.75rem;
+}
+
+button {
+  width: fit-content;
+  border: 0;
+  padding: 0.65rem 1rem;
+  color: #fff;
+  background: #176b87;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.example,
+.validation,
+.results-summary,
+.status {
+  margin: 0.25rem 0;
+}
+
+.validation,
+.error-state {
+  color: #8b1d1d;
+}
+
+.results-section {
+  margin-top: 1.5rem;
+}
+
+.paper-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.paper-card {
+  min-width: 0;
+}
+
+.paper-card h3 {
+  line-height: 1.35;
+}
+
+.metadata,
+.publisher,
+.abstract {
+  color: #405669;
+}
+
+.unavailable {
+  font-style: italic;
+}
+
+.paper-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.paper-links a {
+  color: #0d6680;
+  font-weight: 700;
+}
+
+.state {
+  margin-top: 1rem;
+}
+
+.skeleton span {
+  display: block;
+  height: 1rem;
+  margin-bottom: 0.75rem;
+  border-radius: 0.25rem;
+  background: #dce5ea;
+}
+
+.skeleton span:nth-child(2) {
+  width: 72%;
+}
+
+.skeleton span:nth-child(3) {
+  width: 90%;
 }
