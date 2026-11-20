@@ -32,19 +32,32 @@ describe('aggregatePublicationYears', () => {
   });
 
   it('excludes null and implausible years', () => {
-    const result = aggregatePublicationYears([
-      paper('1', null),
-      paper('2', 1700),
-      paper('3', 2020),
-    ]);
+    const result = aggregatePublicationYears(
+      [paper('1', null), paper('2', 1700), paper('3', 2020), paper('4', 2030)],
+      2026,
+    );
 
     expect(result.counts).toEqual([{ year: 2020, count: 1 }]);
-    expect(result.missingCount).toBe(2);
+    expect(result.includedCount).toBe(1);
+    expect(result.missingCount).toBe(3);
+  });
+
+  it('excludes non-integer and non-finite years defensively', () => {
+    const result = aggregatePublicationYears([
+      paper('1', 2024.5),
+      paper('2', Number.NaN),
+      paper('3', Number.POSITIVE_INFINITY),
+    ]);
+
+    expect(result.counts).toEqual([]);
+    expect(result.includedCount).toBe(0);
+    expect(result.missingCount).toBe(3);
   });
 
   it('returns empty analytics for no papers', () => {
     expect(aggregatePublicationYears([])).toEqual({
       counts: [],
+      includedCount: 0,
       missingCount: 0,
       maximumCount: 0,
     });

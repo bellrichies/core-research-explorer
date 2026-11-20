@@ -42,7 +42,8 @@ test('sends a Boolean query and count, then renders chart and keyboard-operable 
 
   await expect(page.getByText(/Retrieved 3 paper\(s\)/)).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Publication year distribution' })).toBeVisible();
-  await expect(page.locator('.year-bar-group')).toHaveCount(2);
+  await expect(page.locator('.year-chart svg')).toBeVisible();
+  await expect(page.locator('table tbody tr')).toHaveCount(2);
   await expect(page.getByText(/1 paper\(s\) excluded/)).toBeVisible();
 
   await page.getByLabel('Boolean query').focus();

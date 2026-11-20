@@ -7,19 +7,28 @@ export interface PublicationYearCount {
 
 export interface PublicationYearAnalytics {
   counts: PublicationYearCount[];
+  includedCount: number;
   missingCount: number;
   maximumCount: number;
 }
 
+const EARLIEST_PLAUSIBLE_PUBLICATION_YEAR = 1800;
+
 export function aggregatePublicationYears(
   papers: readonly ResearchPaper[],
+  maximumYear = new Date().getUTCFullYear() + 1,
 ): PublicationYearAnalytics {
   const counts = new Map<number, number>();
   let missingCount = 0;
 
   for (const paper of papers) {
     const year = paper.publishedYear;
-    if (typeof year !== 'number' || !Number.isInteger(year) || year < 1800 || year > 2200) {
+    if (
+      typeof year !== 'number' ||
+      !Number.isInteger(year) ||
+      year < EARLIEST_PLAUSIBLE_PUBLICATION_YEAR ||
+      year > maximumYear
+    ) {
       missingCount++;
       continue;
     }
@@ -32,6 +41,7 @@ export function aggregatePublicationYears(
 
   return {
     counts: sortedCounts,
+    includedCount: papers.length - missingCount,
     missingCount,
     maximumCount: sortedCounts.reduce((maximum, item) => Math.max(maximum, item.count), 0),
   };

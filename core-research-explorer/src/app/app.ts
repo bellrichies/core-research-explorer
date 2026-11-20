@@ -4,12 +4,13 @@ import { ResearchStore } from './features/research-search/research.store';
 import { validateBooleanQuery } from './shared/utils/boolean-query.utils';
 import { ResearchPaper } from './core/models/research-paper.model';
 import { aggregatePublicationYears } from './shared/utils/publication-year.utils';
+import { PublicationChart } from './features/analytics/components/publication-chart/publication-chart';
 
 @Component({
   selector: 'app-root',
   styleUrl: './app.scss',
   templateUrl: './app.html',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, PublicationChart],
   providers: [ResearchStore],
 })
 export class App {
@@ -27,13 +28,6 @@ export class App {
   protected readonly publicationAnalytics = computed(() =>
     aggregatePublicationYears(this.store.result()?.papers ?? []),
   );
-  protected readonly publicationChartLabel = computed(() => {
-    const analytics = this.publicationAnalytics();
-    const yearCounts = analytics.counts.map((item) => `${item.year}: ${item.count}`).join('; ');
-    return `Bar chart of publication years among retrieved papers. ${
-      yearCounts || 'No valid publication years'
-    }. ${analytics.missingCount} papers excluded due to missing or invalid years.`;
-  });
 
   protected submitSearch(): void {
     const query = this.searchForm.controls.query.value;

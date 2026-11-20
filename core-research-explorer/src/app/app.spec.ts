@@ -65,8 +65,8 @@ describe('App', () => {
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('.scope-note')?.textContent).toContain('4 retrieved papers');
-    expect(compiled.querySelectorAll('.year-bar-group').length).toBe(2);
-    expect(compiled.querySelector('.chart-summary')?.textContent).toContain('1 paper(s)');
+    expect(compiled.querySelectorAll('table tbody tr').length).toBe(2);
+    expect(compiled.querySelector('.exclusion-note')?.textContent).toContain('1 paper(s)');
   });
 
   it('shows loading then a fixture empty state', async () => {

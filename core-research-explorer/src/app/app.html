@@ -1,45 +1,63 @@
 <header class="app-header">
-  <h1>{{ title() }}</h1>
-  <p>Discover scientific papers from CORE with focused Boolean research searches.</p>
+  <div>
+    <p class="brand-kicker">Research discovery workspace</p>
+    <h1>{{ title() }}</h1>
+    <p>Search, scan and understand scientific publications from CORE.</p>
+  </div>
 </header>
 
 <main class="app-main">
   <a class="skip-link" href="#main-content">Skip to main content</a>
   <section class="search-panel" aria-labelledby="search-heading">
     <h2 id="search-heading">Search CORE</h2>
-    <p class="fixture-note">
-      Live search is provided by CORE through the application's secure server connection.
-    </p>
     <form [formGroup]="searchForm" (ngSubmit)="submitSearch()" novalidate>
-      <label for="query">Boolean query</label>
-      <input
-        id="query"
-        type="text"
-        formControlName="query"
-        autocomplete="off"
-        [attr.aria-describedby]="validationMessage() ? 'query-help query-error' : 'query-help'"
-      />
-      <p id="query-help" class="example">Example: drone AND (package OR delivery)</p>
+      <div class="form-field query-field">
+        <label for="query">Boolean query</label>
+        <input
+          id="query"
+          type="text"
+          formControlName="query"
+          autocomplete="off"
+          [attr.aria-describedby]="validationMessage() ? 'query-help query-error' : 'query-help'"
+        />
+        <p id="query-help" class="sr-only">
+          Example Boolean query: drone AND, open parenthesis, package OR delivery, close
+          parenthesis.
+        </p>
+      </div>
 
-      <label for="limit">Number of papers</label>
-      <select id="limit" formControlName="limit">
-        @for (count of resultCounts; track count) {
-          <option [ngValue]="count">{{ count }}</option>
-        }
-      </select>
+      <div class="form-field limit-field">
+        <label for="limit">Papers</label>
+        <select id="limit" formControlName="limit" aria-label="Number of papers">
+          @for (count of resultCounts; track count) {
+            <option [ngValue]="count">{{ count }}</option>
+          }
+        </select>
+      </div>
 
       @if (validationMessage(); as message) {
         <p id="query-error" class="validation" role="alert">{{ message }}</p>
       }
 
-      <button type="submit" [disabled]="store.isLoading()" [attr.aria-busy]="store.isLoading()">
+      <button
+        class="search-button"
+        type="submit"
+        [disabled]="store.isLoading()"
+        [attr.aria-busy]="store.isLoading()"
+      >
         Search
       </button>
     </form>
+    <p class="fixture-note">Live results are requested securely through the application server.</p>
   </section>
 
   <section id="main-content" class="results-section" aria-labelledby="results-heading">
-    <h2 id="results-heading">Results</h2>
+    <div class="results-heading-row">
+      <div>
+        <p class="section-kicker">Your research set</p>
+        <h2 id="results-heading">Results</h2>
+      </div>
+    </div>
 
     @if (store.isLoading()) {
       <p class="status" role="status">Searching CORE...</p>
@@ -67,42 +85,11 @@
         }
       </p>
 
-      <section class="analytics-panel" aria-labelledby="analytics-heading">
-        <h3 id="analytics-heading">Publication year distribution</h3>
-        <p class="scope-note">
-          Publication years among {{ result.retrievedCount }} retrieved papers for
-          <strong>{{ result.query }}</strong>; not all CORE matches.
-        </p>
-
-        @if (publicationAnalytics().counts.length) {
-          <p class="chart-summary">
-            {{ publicationAnalytics().counts.length }} year(s) represented;
-            {{ publicationAnalytics().missingCount }} paper(s) excluded because the year is missing
-            or invalid.
-          </p>
-          <div class="year-chart" role="img" [attr.aria-label]="publicationChartLabel()">
-            @for (item of publicationAnalytics().counts; track item.year) {
-              <div class="year-bar-group">
-                <span class="bar-value">{{ item.count }}</span>
-                <div
-                  class="year-bar"
-                  [style.height.%]="(item.count / publicationAnalytics().maximumCount) * 100"
-                  aria-hidden="true"
-                ></div>
-                <span class="bar-year">{{ item.year }}</span>
-              </div>
-            }
-          </div>
-        } @else {
-          <div class="chart-empty" role="status">
-            <h4>No publication-year data</h4>
-            <p>
-              {{ publicationAnalytics().missingCount }} retrieved paper(s) have missing or invalid
-              publication years.
-            </p>
-          </div>
-        }
-      </section>
+      <app-publication-chart
+        [analytics]="publicationAnalytics()"
+        [retrievedCount]="result.retrievedCount"
+        [query]="result.query"
+      />
 
       <div class="paper-grid">
         @for (paper of result.papers; track paperTrack($index, paper)) {
